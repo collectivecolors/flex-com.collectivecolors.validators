@@ -20,8 +20,8 @@ package com.collectivecolors.validators
         {
         	var results : Array = [ ];
         	
-        	//                           /-- protocol --\  /-- user --\ /-- password --\  /----------- host --------\ /- port -\  /-------- file ---------\  /-- query ---\  /- anchor -\
-        	var absPattern : RegExp = /^(?:([^\s:]+):\/\/)(?:([^\s:@]+)(?::([^\s@]+))?@)?([^\s:.\/]+(?:\.[^\s:\/?#]+))(?::(\d+))?(?:\/((?:[^\s\/?#]+\/?)*))?(?:\?([^\s#]*))?(?:#([^\s]*))?$/i;
+        	//                           /-- protocol --\  /-- user --\ /-- password --\  /----------- host --------\ /- port -\  /-------- file ---------------\  /-- query ---\  /- anchor -\
+        	var absPattern : RegExp = /^(?:([^\s:]+):\/\/)(?:([^\s:@]+)(?::([^\s@]+))?@)?([^\s:.\/]+(?:\.[^\s:\/?#]+))(?::(\d+))?(?:(?:\/|:)((?:[^\s\/?#]+\/?)*))?(?:\?([^\s#]*))?(?:#([^\s]*))?$/i;
         	var match : Object     = absPattern.exec( value as String );
         	
         	if ( match == null )
@@ -156,7 +156,7 @@ package com.collectivecolors.validators
         
         public function set allowedProtocols( values : Array ) : void
         {
-        	_allowedProtocols = values;
+        	_allowedProtocols = trimValues( values );
         	
         	invalidProtocolError = invalidProtocolErrorOverride;
         }
@@ -170,7 +170,7 @@ package com.collectivecolors.validators
         
         public function set allowedPorts( values : Array ) : void
         {
-        	_allowedPorts = values;
+        	_allowedPorts = trimValues( values );
         	
         	invalidPortError = invalidPortErrorOverride;
         }
@@ -184,7 +184,7 @@ package com.collectivecolors.validators
         
         public function set allowedFileExtensions( values : Array ) : void
         {
-        	_allowedFileExtensions = values;
+        	_allowedFileExtensions = trimValues( values );
         	
         	invalidFileExtensionError = invalidFileExtensionErrorOverride;
         }        
@@ -280,20 +280,35 @@ package com.collectivecolors.validators
        
         override protected function doValidation( value : Object ) : Array
         {
-            var results : Array = super.doValidation( value );
+          var results : Array = super.doValidation( value );
 		
-			// Return if there are errors
-			// or if the required property is set to false and length is 0.
-			var val : String = value ? value as String : "";
+			    // Return if there are errors
+			    // or if the required property is set to false and length is 0.
+			    var val : String = value ? value as String : "";
 			
-			if ( results.length > 0 || ( ( val.length == 0 ) && ! required ) )
-			{
-				return results;
-			}
-			else
-			{
-		    	return URLValidator.validateURL(this, value, null);
-		 	}
+			    if ( results.length > 0 || ( ( val.length == 0 ) && ! required ) )
+			    {
+				    return results;
+			    }
+			    else
+			    {
+		    	  return URLValidator.validateURL(this, value, null);
+		 	    }
+        }
+        
+        //------------------------------------------------------------------------------------------
+        // Internal utility functions
+        
+        private function trimValues( values : Array ) : Array
+        {
+          var trimmed : Array = [ ];
+          
+          for each ( var value : String in values )
+          {
+            trimmed.push( value.replace( /\s+/, '' ) );
+          }
+          
+          return trimmed;
         }
     }
 }
